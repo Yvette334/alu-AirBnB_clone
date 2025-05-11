@@ -1,4 +1,4 @@
 #!/usr/bin/python3
 """
-Package initialization for tests.
+Initialize the tests package
 """
