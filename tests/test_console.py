@@ -174,7 +174,7 @@ class HBNBCommand(cmd.Cmd):
         if "{}.{}".format(args[0], args[1]) not in objdict.keys():
             print("** no instance found **")
             return False
-        
+
         # Handle dictionary update
         if len(args) == 3 and type(eval(args[2])) is dict:
             obj = objdict["{}.{}".format(args[0], args[1])]
@@ -201,7 +201,7 @@ class HBNBCommand(cmd.Cmd):
                     obj.__dict__[args[2]] = valtype(args[3])
                 else:
                     obj.__dict__[args[2]] = args[3]
-        
+
         storage.save()
 
 
