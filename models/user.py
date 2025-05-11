@@ -1,17 +1,12 @@
 #!/usr/bin/python3
-
-"""This file defines the UserModel class
-It inherits from the BaseModel
 """
-
-
+User Module for HBNB project
+"""
 from models.base_model import BaseModel
 
 
 class User(BaseModel):
-    """The User Model"""
-
-    # Attributes
+    """User class that inherits from BaseModel"""
     email = ""
     password = ""
     first_name = ""

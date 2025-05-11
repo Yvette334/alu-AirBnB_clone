@@ -1,47 +1,63 @@
 #!/usr/bin/python3
+"""
+Module for FileStorage class
+"""
+import datetime
 import json
-""" this is a class that defines file storage"""
-from models.base_model import BaseModel
+import os
 
 
 class FileStorage:
-    """ class that serializes instances to a JSON file
-    and deserializes JSON file to instances:
+    """
+    Serializes instances to a JSON file and deserializes back to instances
     """
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
-        """ a public instance method all that returns the dictionary
-        object(private)
-        """
+        """Returns the dictionary __objects"""
         return self.__objects
 
     def new(self, obj):
-        """ sets in __objects the obj with key <obj class name>.id"""
-        ob = str(obj.__class__.__name__)
-        FileStorage.__objects[f"{ob}.{obj.id}"] = obj
+        """Sets in __objects the obj with key <obj class name>.id"""
+        key = obj.__class__.__name__ + "." + obj.id
+        self.__objects[key] = obj
 
     def save(self):
-        """ serializes __objects to the JSON file (path: __file_path)"""
-        objdic = {}
-        for k, v in FileStorage.__objects.items():
-            objdic[k] = v.to_dict()
-
-        with open(FileStorage.__file_path, mode='w') as file:
-            json.dump(objdic, file)
+        """Serializes __objects to the JSON file"""
+        json_objects = {}
+        for key, obj in self.__objects.items():
+            json_objects[key] = obj.to_dict()
+        with open(self.__file_path, 'w') as f:
+            json.dump(json_objects, f)
 
     def reload(self):
-        """deserializes the JSON file to __objects (only if the JSON file
-        (__file_path) exists ; otherwise, do nothing. If the file doesn’t
-        exist, no exception should be raised)
-        """
+        """Deserializes the JSON file to __objects"""
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.place import Place
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.review import Review
+
+        classes = {
+            'BaseModel': BaseModel,
+            'User': User,
+            'Place': Place,
+            'State': State,
+            'City': City,
+            'Amenity': Amenity,
+            'Review': Review
+        }
+
         try:
-            with open(FileStorage.__file_path) as file:
-                FileStorage.__objects = json.load(file)
-                for k, v in FileStorage.__objects.items():
-                    class_name = v["__class__"]
-                    del v["__class__"]
-                    self.new(eval(class_name)(**v))
-        except FileNotFoundError:
+            if os.path.isfile(self.__file_path):
+                with open(self.__file_path, 'r') as f:
+                    obj_dict = json.load(f)
+                    for key, value in obj_dict.items():
+                        class_name = value["__class__"]
+                        if class_name in classes:
+                            self.__objects[key] = classes[class_name](**value)
+        except Exception:
             pass

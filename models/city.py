@@ -1,15 +1,11 @@
 #!/usr/bin/python3
-
-"""This file defines the City Model
-It inherits from the BaseModel
 """
-
+City Module for HBNB project
+"""
 from models.base_model import BaseModel
 
 
 class City(BaseModel):
-    """The City Model"""
-
-    # Attributes
-    name = ""
+    """City class that inherits from BaseModel"""
     state_id = ""
+    name = ""

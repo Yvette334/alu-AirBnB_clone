@@ -1,16 +1,20 @@
 #!/usr/bin/python3
-
-"""This file defines the Review Model
-It inherits from the BaseModel
 """
-
+Place Module for HBNB project
+"""
 from models.base_model import BaseModel
 
 
-class Review(BaseModel):
-    """The Review Model"""
-
-    # Attributes
-    place_id = ""
+class Place(BaseModel):
+    """Place class that inherits from BaseModel"""
+    city_id = ""
     user_id = ""
-    text = ""
+    name = ""
+    description = ""
+    number_rooms = 0
+    number_bathrooms = 0
+    max_guest = 0
+    price_by_night = 0
+    latitude = 0.0
+    longitude = 0.0
+    amenity_ids = []

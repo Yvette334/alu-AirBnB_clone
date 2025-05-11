@@ -1,18 +1,30 @@
-#!/usr/bin/python3
-"""
-Command interpreter for the HBNB program
+ommand interpreter for the HBNB program
 """
 import cmd
 import json
 import shlex
 from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 from models import storage
 
 
 class HBNBCommand(cmd.Cmd):
     """Command processor for HBNB program"""
     prompt = '(hbnb) '
-    valid_classes = {"BaseModel"}
+    valid_classes = {
+        "BaseModel",
+        "User",
+        "Place",
+        "State",
+        "City",
+        "Amenity",
+        "Review"
+    }
 
     def do_quit(self, arg):
         """Quit command to exit the program"""
