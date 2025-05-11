@@ -1,188 +1,190 @@
 #!/usr/bin/python3
-"""
-This file defines the console class which will
-serve as the entry point of the entire project
-"""
+"""This module contains the entry point of the command interpreter"""
 
-from cmd import Cmd
-from models import storage
-from models.engine.errors import *
-import shlex
-from models.base_model import BaseModel
-from models.user import User
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
-from models.review import Review
+import cmd
+import models
 
 
-# Global variable of registered models
-classes = storage.models
-
-
-class HBNBCommand(Cmd):
-    """
-    The Console based driver of the AirBnb Clone
-    All interactions with the system is done via
-    this class"""
-
+class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
 
-    """Commands"""
-    def do_EOF(self, args):
-        """Exit the programme in non-interactive mode"""
-        return True
-
-    def do_quit(self, args):
-        """Quit command exit the program"""
-        return True
-
-    def do_create(self, args):
-        """Create an instance of Model given its name eg.
-        $ create ModelName
-        Throws an Error if ModelName is missing or doesnt exist"""
-        args, n = parse(args)
-
-        if not n:
-            print("** class name missing **")
-        elif args[0] not in classes:
-            print("** class doesn't exist **")
-        elif n == 1:
-            # temp = classes[args[0]]()
-            temp = eval(args[0])()
-            print(temp.id)
-            temp.save()
-        else:
-            print("** Too many argument for create **")
-            pass
-
-    def do_show(self, arg):
-        """Show an Instance of Model base on its ModelName and id eg.
-        $ show MyModel instance_id
-        Print error message if either MyModel or instance_id is missing
-        Print an Error message for wrong MyModel or instance_id"""
-        args, n = parse(arg)
-
-        if not n:
-            print("** class name missing **")
-        elif n == 1:
-            print("** instance id missing **")
-        elif n == 2:
-            try:
-                inst = storage.find_by_id(*args)
-                print(inst)
-            except ModelNotFoundError:
-                print("** class doesn't exist **")
-            except InstanceNotFoundError:
-                print("** no instance found **")
-        else:
-            print("** Too many argument for show **")
-            pass
-
-    def do_destroy(self, arg):
-        """Deletes an Instance of Model base on its ModelName and id."""
-        args, n = parse(arg)
-
-        if not n:
-            print("** class name missing **")
-        elif n == 1:
-            print("** instance id missing **")
-        elif n == 2:
-            try:
-                storage.delete_by_id(*args)
-            except ModelNotFoundError:
-                print("** class doesn't exist **")
-            except InstanceNotFoundError:
-                print("** no instance found **")
-        else:
-            print("** Too many argument for destroy **")
-            pass
-
-    def do_all(self, args):
-        """Usage: all or all <class> or <class>.all()
-        Display string representations of all instances of a given class.
-        If no class is specified, displays all instantiated objects."""
-        args, n = parse(args)
-
-        if n < 2:
-            try:
-                print(storage.find_all(*args))
-            except ModelNotFoundError:
-                print("** class doesn't exist **")
-        else:
-            print("** Too many argument for all **")
-            pass
-
-    def do_update(self, arg):
-        """Updates an instance base on its id eg
-        $ update Model id field value
-        Throws errors for missing arguments"""
-        args, n = parse(arg)
-        if not n:
-            print("** class name missing **")
-        elif n == 1:
-            print("** instance id missing **")
-        elif n == 2:
-            print("** attribute name missing **")
-        elif n == 3:
-            print("** value missing **")
-        else:
-            try:
-                storage.update_one(*args[0:4])
-            except ModelNotFoundError:
-                print("** class doesn't exist **")
-            except InstanceNotFoundError:
-                print("** no instance found **")
-
-    def do_models(self, arg):
-        """Print all registered Models"""
-        print(*classes)
-
-    def handle_class_methods(self, arg):
-        """Handle Class Methods
-        <cls>.all(), <cls>.show() etc
+    def do_quit(self, arg):
         """
+        Quit the console.
 
-        printable = ("all(", "show(", "count(", "create(")
-        try:
-            val = eval(arg)
-            for x in printable:
-                if x in arg:
-                    print(val)
-                    break
-            return
-        except AttributeError:
-            print("** invalid method **")
-        except InstanceNotFoundError:
-            print("** no instance found **")
-        except TypeError as te:
-            field = te.args[0].split()[-1].replace("_", " ")
-            field = field.strip("'")
-            print(f"** {field} missing **")
-        except Exception as e:
-            print("** invalid syntax **")
-            pass
+        Usage:
+            quit
+            q
+            exit
+        """
+        return True
 
-    def default(self, arg):
-        """Override default method to handle class methods"""
-        if '.' in arg and arg[-1] == ')':
-            if arg.split('.')[0] not in classes:
-                print("** class doesn't exist **")
-                return
-            return self.handle_class_methods(arg)
-        return Cmd.default(self, arg)
+    do_q = do_quit
+    do_exit = do_quit
+
+    def do_EOF(self, arg):
+        """
+        Quit the console.
+
+        Usage:
+            EOF
+        """
+        return True
 
     def emptyline(self):
-        """Override empty line to do nothing"""
-        return
+        """
+        An empty line + ENTER shouldn't execute anything
+        """
+        pass
 
+    def do_create(self, arg):
+        """
+        Creates a new inst of BaseModel, saves it, and prints the id.
 
-def parse(line: str):
-    """splits a line by spaces"""
-    args = shlex.split(line)
-    return args, len(args)
+        Usage: create <class_name>
 
+        Args:
+            arg (str): The argument should contain the <class_name>.
+        """
 
-if __name__ == "__main__":
+        class_name = arg.split(" ")[0]
+
+        if not class_name:
+            print("** class name missing **")
+        elif class_name not in models.classes:
+            print("** class doesn't exist **")
+        else:
+            instance = models.classes[class_name]()
+            instance.save()
+            print(instance.id)
+
+    def do_show(self, arg):
+        """
+        Displays the string representation of an instance.
+
+        Usage: create <class_name> <instance_id>
+
+        Args:
+            arg (str): Argument should contain <class_name> <instance_id>.
+        """
+
+        split_args = arg.split(" ")
+        class_name = split_args[0] if len(split_args) > 0 else None
+        obj_id = split_args[1] if len(split_args) > 1 else None
+
+        if not class_name:
+            print("** class name missing **")
+        elif class_name not in models.classes:
+            print("** class doesn't exist **")
+        elif not obj_id:
+            print("** instance id missing **")
+        else:
+            key = f"{class_name}.{obj_id}"
+            if key in models.loaded_objects:
+                print(models.loaded_objects[key])
+            else:
+                print("** no instance found **")
+
+    def do_destroy(self, arg):
+        """
+        Deletes an instance based on the class name and id.
+
+        Usage: destroy <class_name> <instance_id>
+
+        Args:
+            arg (str): Argument should contain <class_name> <instance_id>.
+        """
+
+        split_args = arg.split(" ")
+        class_name = split_args[0] if len(split_args) > 0 else None
+        obj_id = split_args[1] if len(split_args) > 1 else None
+
+        if not class_name:
+            print("** class name missing **")
+        elif class_name not in models.classes:
+            print("** class doesn't exist **")
+        elif not obj_id:
+            print("** instance id missing **")
+        else:
+            key = f"{class_name}.{obj_id}"
+            if key in models.loaded_objects:
+                del models.loaded_objects[key]
+                models.storage.save()
+            else:
+                print("** no instance found **")
+
+    do_delete = do_destroy
+
+    def do_all(self, arg):
+        """
+        Prints all string representation of all instances.
+
+        Usage:
+            all
+            all <class_name>
+
+        Args:
+            arg (str): The argument should contain <class_name>.
+        """
+
+        split_args = arg.split(" ")
+        class_name = split_args[0] if len(split_args) > 0 else None
+
+        if not class_name:
+            print([str(obj) for obj in models.loaded_objects.values()])
+        elif class_name not in models.classes:
+            print("** class doesn't exist **")
+        else:
+            print([str(obj) for obj in models.loaded_objects.values()
+                   if type(obj) == models.classes[class_name]])
+
+    def remove_quotes(self, arg):
+        """
+        Removes the quotes from the argument.
+        """
+        rules = {"\"": "", "\'": ""}
+        for key, value in rules.items():
+            arg = arg.replace(key, value)
+        return arg
+
+    def do_update(self, arg):
+        """
+        Updates an instance based on the class name and id.
+
+        Usage: update <class_name> <instance_id> <attr_name> "<attr_value>"
+
+        Args:
+            arg (str): <class_name> <instance_id> <attr_name> <attr_value>.
+        """
+
+        split_args = arg.split(" ")
+        class_name = split_args[0] if len(split_args) > 0 else None
+        obj_id = split_args[1] if len(split_args) > 1 else None
+        attr_name = split_args[2] if len(split_args) > 2 else None
+        attr_value = split_args[3] if len(split_args) > 3 else None
+
+        if not class_name:
+            print("** class name missing **")
+        elif class_name not in models.classes:
+            print("** class doesn't exist **")
+        elif not obj_id:
+            print("** instance id missing **")
+        elif not attr_name:
+            print("** attribute name missing **")
+        elif not attr_value:
+            print("** value missing **")
+        else:
+            key = f"{class_name}.{obj_id}"
+            forbidden_attrs = ['id', 'created_at', 'updated_at']
+            if key in models.loaded_objects:
+                if attr_name not in forbidden_attrs:
+                    setattr(models.loaded_objects[key], attr_name,
+                            self.remove_quotes(attr_value))
+                    models.storage.save()
+                else:
+                    print(f"** Can't update the {attr_name} attribute **")
+            else:
+                print("** no instance found **")
+
+if __name__ == '__main__':
     HBNBCommand().cmdloop()
