@@ -5,6 +5,7 @@ Command interpreter for the HBNB program
 import cmd
 import json
 import shlex
+import re
 from models.base_model import BaseModel
 from models.user import User
 from models.place import Place
@@ -154,6 +155,66 @@ class HBNBCommand(cmd.Cmd):
             
             setattr(obj, attr_name, attr_value)
             obj.save()
+
+    def default(self, arg):
+        """Default behavior for cmd module when input is invalid"""
+        arg_list = arg.split('.')
+        if len(arg_list) == 1:
+            print("*** Unknown syntax: {}".format(arg))
+            return
+        
+        class_name = arg_list[0]
+        command = arg_list[1].split('(')[0]
+        args = arg_list[1].split('(')[1].rstrip(')')
+        
+        # Handle different command formats
+        if command == 'all':
+            self.do_all(class_name)
+        elif command == 'count':
+            self.do_count(class_name)
+        elif command == 'show':
+            id = args.strip('"\'')
+            self.do_show(class_name + ' ' + id)
+        elif command == 'destroy':
+            id = args.strip('"\'')
+            self.do_destroy(class_name + ' ' + id)
+        elif command == 'update':
+            # Check for dictionary update format
+            dict_match = re.search(r"([^{]*),\s*({.*})(.*)", args)
+            if dict_match:
+                id = dict_match.group(1).strip('\'"')
+                attr_dict = eval(dict_match.group(2))
+                for attr_name, attr_value in attr_dict.items():
+                    self.do_update('{} {} {} "{}"'.format(
+                        class_name, id, attr_name, attr_value))
+            else:
+                # Handle regular update format
+                args_list = args.split(',')
+                id = args_list[0].strip('\'"')
+                if len(args_list) > 1:
+                    attr_name = args_list[1].strip('\'" ')
+                    if len(args_list) > 2:
+                        attr_value = args_list[2].strip('\'" ')
+                        self.do_update('{} {} {} "{}"'.format(
+                            class_name, id, attr_name, attr_value))
+        else:
+            print("*** Unknown syntax: {}".format(arg))
+
+    def do_count(self, arg):
+        """Counts the number of instances of a class
+        Usage: count <class name> or <class name>.count()
+        """
+        args = shlex.split(arg)
+        if len(args) == 0:
+            print("** class name missing **")
+        elif args[0] not in self.valid_classes:
+            print("** class doesn't exist **")
+        else:
+            count = 0
+            for obj in storage.all().values():
+                if args[0] == obj.__class__.__name__:
+                    count += 1
+            print(count)
 
 
 if __name__ == '__main__':
