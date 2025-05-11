@@ -102,7 +102,7 @@ class HBNBCommand(cmd.Cmd):
         args = shlex.split(arg)
         objects = storage.all()
         obj_list = []
-        
+
         if len(args) == 0:
             for obj in objects.values():
                 obj_list.append(str(obj))
@@ -121,7 +121,7 @@ class HBNBCommand(cmd.Cmd):
         """
         args = shlex.split(arg)
         objects = storage.all()
-        
+
         if len(args) == 0:
             print("** class name missing **")
         elif args[0] not in self.valid_classes:
@@ -139,20 +139,21 @@ class HBNBCommand(cmd.Cmd):
             obj = objects[key]
             attr_name = args[2]
             attr_value = args[3]
-            
+
             # Skip protected attributes
             if attr_name in ["id", "created_at", "updated_at"]:
                 return
-            
+
             # Try to convert value to appropriate type
             try:
                 if attr_value.isdigit():
                     attr_value = int(attr_value)
-                elif attr_value.replace('.', '', 1).isdigit() and attr_value.count('.') < 2:
+                elif (attr_value.replace('.', '', 1).isdigit() and
+                      attr_value.count('.') < 2):
                     attr_value = float(attr_value)
             except AttributeError:
                 pass
-            
+
             setattr(obj, attr_name, attr_value)
             obj.save()
 
@@ -162,11 +163,11 @@ class HBNBCommand(cmd.Cmd):
         if len(arg_list) == 1:
             print("*** Unknown syntax: {}".format(arg))
             return
-        
+
         class_name = arg_list[0]
         command = arg_list[1].split('(')[0]
         args = arg_list[1].split('(')[1].rstrip(')')
-        
+
         # Handle different command formats
         if command == 'all':
             self.do_all(class_name)
