@@ -11,33 +11,27 @@ from models.base_model import BaseModel
 
 class TestBaseModel(unittest.TestCase):
     """Test cases for BaseModel class"""
-    
     def setUp(self):
         """Set up test cases"""
         pass
-    
     def tearDown(self):
         """Clean up after tests"""
         try:
             os.remove("file.json")
         except:
             pass
-
-
 class TestBaseModel_Save(unittest.TestCase):
     """Test cases for BaseModel save method"""
     
     def setUp(self):
         """Set up test cases"""
         pass
-    
     def tearDown(self):
         """Clean up after tests"""
         try:
             os.remove("file.json")
         except:
             pass
-    
     def test_save_once(self):
         """test if when saved once the date is diff"""
         Bm1 = BaseModel()
