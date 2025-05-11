@@ -14,12 +14,14 @@ class TestBaseModel(unittest.TestCase):
     def setUp(self):
         """Set up test cases"""
         pass
+        
     def tearDown(self):
         """Clean up after tests"""
         try:
             os.remove("file.json")
         except:
             pass
+            
 class TestBaseModel_Save(unittest.TestCase):
     """Test cases for BaseModel save method"""
     
