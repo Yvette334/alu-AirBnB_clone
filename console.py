@@ -1,4 +1,6 @@
-ommand interpreter for the HBNB program
+#!/usr/bin/python3
+"""
+Command interpreter for the HBNB program
 """
 import cmd
 import json
